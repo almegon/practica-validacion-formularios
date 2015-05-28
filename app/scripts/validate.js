@@ -2,6 +2,209 @@
 $(document).ready(function() {
 
 
+
+    $('#formulario').validate({
+        rules: {
+            nombre: {
+                required: true
+            },
+            apellidos: {
+                required: true
+            },
+            telefono: {
+                required: true,
+                digits: true,
+                maxlength: 9,
+                minlength: 9
+            },
+            email: {
+                required: true,
+                email: true,
+                remote: 'http://localhost:9000/php/validar_email_db.php'
+            },
+            emailConf: {
+                equalTo: '#email'
+            },
+            nif: {
+                required: function() {
+                    return $('#particular').is(':checked');
+                },
+                nif: 'nif',
+                remote: 'http://localhost:9000/php/validar_nif_db.php'
+            },
+            cif: {
+                required: function() {
+                    return $('#empresa').is(':checked');
+                },
+                cif: 'cif'
+            },
+            nombreempresa: {
+                required: true
+            },
+            direccion: {
+                required: true
+            },
+            zip: {
+                required: true,
+                //remote: 'http://www.futbolistas.com/validar_zip_db.php',
+                maxlength: 5,
+                digits: true
+            },
+            provincia: {
+                required: true
+            },
+            localidad: {
+                required: true
+            },
+            pais: {
+                required: true
+            },
+            iban: {
+                required: true,
+                iban: 'iban'
+            },
+            usuario: {
+                required: true,
+                //remote: 'http://localhost:9000/php/validar_nif_db',
+                minlength: 4
+            },
+            pass: {
+                required: true,
+                complexPass: true,
+                minlength: 6
+            },
+            pass2: {
+                equalTo: '#pass'
+            }
+        },
+        // Se pide la confirmacion de alta si todo es correcto
+        submitHandler: function() {
+            var usuario = $('#usuario').val();
+            var cuota = $('input[name="pago"]:checked').val();
+            var aceptar = confirm('Va a dar de alta el usuario: ' + usuario + ' y se cobrara la primera cuota de ' + cuota + ' €');
+            if (aceptar === 1) { // ===true
+                alert('¡Envíado! ' + usuario);
+            }
+        }
+    });
+
+    //Mensajes de error
+    (function ($) {
+    $.extend($.validator.messages, {
+            required: 'Este campo es obligatorio.',
+            remote: 'Este usuario ya existe, elija otro.',
+            email: 'Por favor, escribe una dirección de correo válida.',
+            url: 'Por favor, escribe una URL válida.',
+            date: 'Por favor, escribe una fecha válida.',
+            dateISO: 'Por favor, escribe una fecha (ISO) válida.',
+            number: 'Por favor, escribe un número válido.',
+            digits: 'Por favor, escribe sólo dígitos.',
+            creditcard: 'Por favor, escribe un número de tarjeta válido.',
+            equalTo: 'Por favor, escribe el mismo valor de nuevo.',
+            extension: 'Por favor, escribe un valor con una extensión aceptada.',
+            maxlength: $.validator.format('Por favor, no escribas más de {0} caracteres.'),
+            minlength: $.validator.format('Por favor, no escribas menos de {0} caracteres.'),
+            rangelength: $.validator.format('Por favor, escribe un valor entre {0} y {1} caracteres.'),
+            range: $.validator.format('Por favor, escribe un valor entre {0} y {1}.'),
+            max: $.validator.format('Por favor, escribe un valor menor o igual a {0}.'),
+            min: $.validator.format('Por favor, escribe un valor mayor o igual a {0}.'),
+            nifES: 'Por favor, escribe un NIF válido.',
+            nieES: 'Por favor, escribe un NIE válido.',
+            cifES: 'Por favor, escribe un CIF válido.',
+        });
+}(jQuery));
+
+
+
+
+        //Nombre de usuario equivalente al email
+        $('#email').focusout(function() {
+            $('#usuario').val($('#email').val());
+        });
+
+
+    // Metodo para comprobar Codigo Postal.
+    // $('#zip').on('focusout', function(){
+    // var codpostal = document.getElementById('zip').value;
+    // var postalformat = ('0000' + codpostal).slice (-5);
+    // document.getElementById('zip').value = postalformat;
+    // });
+
+
+
+    $('#zip').focusout(function() {
+        if ($('#pais option:selected').val() === 'ES/0/0') {
+            if ($(this).val() !== '') {
+                var dato = $(this).val();
+                if (dato.length >= 2) {
+                    dato = dato.substring(0, 2);
+                }
+                $('#provincia').val(dato);
+                $('#localidad').val($('#provincia option[value=' + dato + ']').text());
+            }
+        }
+        var zip = $(this).val();
+        var resultado = 5 - zip.length;
+        for (var i = 0; i < resultado; i++) {
+            zip = '0' + zip;
+        }
+        $(this).val(zip);
+    });
+
+    // Se actualizan los apellidos de facturacion si cambia los datos.
+    $('#apellidos').focusout(function() {
+        if ($('#particular').is(':checked')) {
+            $('#nombreempresa').val($('#nombre').val() + ' ' + $('#apellidos').val());
+        }
+    });
+    // Se actualiza el nombre de facturacion si cambia los datos.
+    $('#nombre').focusout(function() {
+        if ($('#particular').is(':checked')) {
+            $('#nombreempresa').val($('#nombre').val() + ' ' + $('#apellidos').val());
+        }
+    });
+
+    // Se cambian los label si es particular.
+    $('#particular').change(function() {
+        $('#label_nombre').text('Nombre:');
+        $('#label_nif').text('Nif:');
+        $('#nombreempresa').val($('#nombre').val() + ' ' + $('#apellidos').val());
+        $('label[for="cif"]').hide();
+        $('#cif').val('').hide();
+        $('#nif').show();
+        $('label[for="nif"]').show();
+    });
+
+    // Se cambian los label si es empresa.
+    $('#empresa').change(function() {
+        $('#nombreempresa').val('');
+        $('#label_nombre').text('Empresa:');
+        $('#label_nif').text('Cif:');
+        $('label[for="nif"]').hide();
+        $('#nif').val('').hide();
+        $('#cif').show();
+        $('label[for="cif"]').show();
+    });
+
+    // Metodo para comprobar la complejidad de la contraseña.
+    jQuery.validator.addMethod('complexPass', function(value, element) {
+        var level = $('#complex').attr('value');
+        if (level >= 35) {
+            return true;
+        } else {
+            return false;
+        }
+    }, 'Debes usar una contraseña segura.');
+
+    $('#pass').focusin(function() {
+        $('#pass').complexify({}, function(valid, complexity) {
+            $('#complex').attr('value', complexity);
+        });
+    });
+
+    //http://moreovercoder.blogspot.com.es/2013/07/validacion-de-nie-nif-y-cif-con-jquery.html
+
+
     // Metodo para comprobar el cif.
     jQuery.validator.addMethod('cif', function(value, element) {
         var sum,
@@ -49,22 +252,13 @@ $(document).ready(function() {
             return false;
         }
 
-        // Test NIE
-        //T
-        if (/^[T]{1}/.test(value)) {
-            return (value[8] === /^[T]{1}[A-Z0-9]{8}$/.test(value));
+        // Test NIF
+        if (/^[0-9]{8}[A-Z]{1}$/.test(value)) {
+            return ("TRWAGMYFPDXBNJZSQVHLCKE".charAt(value.substring(8, 0) % 23) === value.charAt(8));
         }
-
-        //XYZ
-        if (/^[XYZ]{1}/.test(value)) {
-            return (
-                value[8] === 'TRWAGMYFPDXBNJZSQVHLCKE'.charAt(
-                    value.replace('X', '0')
-                    .replace('Y', '1')
-                    .replace('Z', '2')
-                    .substring(0, 8) % 23
-                )
-            );
+        // Test specials NIF (starts with K, L or M)
+        if (/^[KLM]{1}/.test(value)) {
+            return (value[8] === String.fromCharCode(64));
         }
 
         return false;
@@ -189,157 +383,5 @@ $(document).ready(function() {
     }, 'IBAN incorrecto.');
 
 
-
-
-    $.extend($.validator.messages, {
-            required: 'Este campo es obligatorio.',
-            remote: 'Este usuario ya existe, elija otro.',
-            email: 'Por favor, escribe una dirección de correo válida.',
-            url: 'Por favor, escribe una URL válida.',
-            date: 'Por favor, escribe una fecha válida.',
-            dateISO: 'Por favor, escribe una fecha (ISO) válida.',
-            number: 'Por favor, escribe un número válido.',
-            digits: 'Por favor, escribe sólo dígitos.',
-            creditcard: 'Por favor, escribe un número de tarjeta válido.',
-            equalTo: 'Por favor, escribe el mismo valor de nuevo.',
-            extension: 'Por favor, escribe un valor con una extensión aceptada.',
-            maxlength: $.validator.format('Por favor, no escribas más de {0} caracteres.'),
-            minlength: $.validator.format('Por favor, no escribas menos de {0} caracteres.'),
-            rangelength: $.validator.format('Por favor, escribe un valor entre {0} y {1} caracteres.'),
-            range: $.validator.format('Por favor, escribe un valor entre {0} y {1}.'),
-            max: $.validator.format('Por favor, escribe un valor menor o igual a {0}.'),
-            min: $.validator.format('Por favor, escribe un valor mayor o igual a {0}.'),
-            nifES: 'Por favor, escribe un NIF válido.',
-            nieES: 'Por favor, escribe un NIE válido.',
-            cifES: 'Por favor, escribe un CIF válido.',
-        }),
-
-        // Metodo para comprobar Codigo Postal.
-        $('#cp').focusout(function() {
-            if ($('#pais option:selected').val() === 'ES/0/0') {
-                if ($(this).val() !== '') {
-                    var dato = $(this).val();
-                    if (dato.length >= 2) {
-                        dato = dato.substring(0, 2);
-                    }
-                    $('#provincia').val(dato);
-                    $('#localidad').val($('#provincia option[value=' + dato + ']').text());
-                }
-            }
-            var zip = $(this).val();
-            var resultado = 5 - zip.length;
-            for (var i = 0; i < resultado; i++) {
-                zip = '0' + zip;
-            }
-            $(this).val(zip);
-        });
-
-    // Metodo para hacer la pass compleja.
-    jQuery.validator.addMethod('complexPass', function(value, element) {
-        var level = $('#complex').attr('value');
-        if (level >= 35) {
-            return true;
-        } else {
-            return false;
-        }
-    }, 'Debes usar una contraseña segura.');
-
-    $('#pass').focusin(function() {
-        $('#pass').complexify({}, function(valid, complexity) {
-            $('#complex').attr('value', complexity);
-        });
-    });
-
-
-    $('#formulario').validate({
-        rules: {
-            nombre: {
-                required: true,
-            },
-            apellidos: {
-                required: true,
-            },
-            telefono: {
-                required: true,
-                digits: true,
-                minlength: 9,
-                maxlength: 9
-            },
-            email: {
-                email: true,
-                required: true,
-                minlength: 6,
-                remote: 'http://www.futbolistas.com/validar_email_db.php'
-            },
-            email2: {
-                required: true,
-                equalTo: '#email'
-            },
-            nif: {
-                required: function() {
-                    return $('#particular').is(':checked');
-                },
-                nif: 'nif',
-                remote: 'http://www.futbolistas.com/validar_nif_db'
-            },
-            cif: {
-                required: function() {
-                    return $('#empresa').is(':checked');
-                },
-                cif: 'cif'
-            },
-            nombreempresa: {
-                required: true
-            },
-            direccion: {
-                required: true,
-            },
-            localidad: {
-                required: true,
-            },
-            provincia: {
-                required: true,
-            },
-            pais: {
-                required: true,
-            },
-            iban: {
-                required: true,
-                iban: 'iban'
-            },
-
-            usuario: {
-                usuario: true,
-                required: true,
-                remote: 'http://www.futbolistas.com/validar_nif_db.php',
-                minlength: 4
-            },
-            password: {
-                password: true,
-                required: true,
-                complexPass: true,
-                minlength: 6
-            },
-            password2: {
-                required: true,
-                equalTo: '#password'
-            },
-            cp: {
-                cp: true,
-                required: true,
-                digits: true,
-                minlength: 4,
-                maxlength: 5,
-                remote: 'http://www.futbolistas.com/validar_zip_db.php'
-            }
-
-        },
-        submitHandler: function() {
-            alert('¡Envíado!');
-        }
-
-
-
-    });
 
 });
