@@ -20,17 +20,17 @@ $(document).ready(function() {
             email: {
                 required: true,
                 email: true,
-                remote: 'http://localhost:9000/php/validar_email_db.php'
+                remote: 'http://localhost/futbolistas/validar_email_db.php'
             },
             emailConf: {
                 equalTo: '#email'
             },
-            nif: {
+            cifnif: {
                 required: function() {
                     return $('#particular').is(':checked');
                 },
                 nif: 'nif',
-                remote: 'http://localhost:9000/php/validar_nif_db.php'
+                remote: 'http://localhost/futbolistas/validar_nif_db.php'
             },
             cif: {
                 required: function() {
@@ -46,9 +46,11 @@ $(document).ready(function() {
             },
             zip: {
                 required: true,
-                //remote: 'http://www.futbolistas.com/validar_zip_db.php',
+                //remote: 'http://localhost/futbolistas/validar_zip_db.php',
                 maxlength: 5,
-                digits: true
+                minlength: 4,
+                digits: true,
+                max: 52999
             },
             provincia: {
                 required: true
@@ -65,7 +67,7 @@ $(document).ready(function() {
             },
             usuario: {
                 required: true,
-                //remote: 'http://localhost:9000/php/validar_nif_db',
+                //remote: 'http://www.futbolistas.com/validar_nif_db',
                 minlength: 4
             },
             pass: {
@@ -77,6 +79,14 @@ $(document).ready(function() {
                 equalTo: '#pass'
             }
         },
+
+        messages: {
+            email: {
+                remote: 'Este email ya existe.'
+            }
+
+        },
+
         // Se pide la confirmacion de alta si todo es correcto
         submitHandler: function() {
             var usuario = $('#usuario').val();
@@ -89,8 +99,8 @@ $(document).ready(function() {
     });
 
     //Mensajes de error
-    (function ($) {
-    $.extend($.validator.messages, {
+    (function($) {
+        $.extend($.validator.messages, {
             required: 'Este campo es obligatorio.',
             remote: 'Este usuario ya existe, elija otro.',
             email: 'Por favor, escribe una dirección de correo válida.',
@@ -112,18 +122,18 @@ $(document).ready(function() {
             nieES: 'Por favor, escribe un NIE válido.',
             cifES: 'Por favor, escribe un CIF válido.',
         });
-}(jQuery));
+    }(jQuery));
 
 
 
 
-        //Nombre de usuario equivalente al email
-        $('#email').focusout(function() {
-            $('#usuario').val($('#email').val());
-        });
+    //Nombre de usuario equivalente al email
+    $('#email').focusout(function() {
+        $('#usuario').val($('#email').val());
+    });
 
 
-    // Metodo para comprobar Codigo Postal.
+
     // $('#zip').on('focusout', function(){
     // var codpostal = document.getElementById('zip').value;
     // var postalformat = ('0000' + codpostal).slice (-5);
@@ -131,8 +141,43 @@ $(document).ready(function() {
     // });
 
 
+    // Si el Código Postal se compone de 4 dígitos, se agrega un 0 a la izquierda.
+    /*$('#zip').focusout(function() {
+                var caracteres = $('#zip').val();
+                if (caracteres.length === 4)
+                    $('#zip').val("0" + caracteres);
+            });
+*/
 
+    /*//Validación del Código Postal mediante Ajax
+           $('#zip').change(function(){
+               if($(this).val()!==""){
+                   var dato=$(this).val();
+                   $.ajax({
+                       type:'POST',
+                       dataType:'html',
+                       url:'http://localhost/futbolistas/validar_zip_db.php',
+                       data:"zip="+dato,
+                       success:function(msg){
+                           alert(msg);
+                           $('#provincia').val(msg);
+                       }
+                   });
+               }           
+           });*/
+
+
+
+
+    // Metodo para comprobar Codigo Postal.
     $('#zip').focusout(function() {
+        var zip = $(this).val();
+        var resultado = 5 - zip.length;
+        for (var i = 0; i < resultado; i++) {
+            zip = '0' + zip;
+        }
+        $(this).val(zip);
+
         if ($('#pais option:selected').val() === 'ES/0/0') {
             if ($(this).val() !== '') {
                 var dato = $(this).val();
@@ -143,13 +188,12 @@ $(document).ready(function() {
                 $('#localidad').val($('#provincia option[value=' + dato + ']').text());
             }
         }
-        var zip = $(this).val();
-        var resultado = 5 - zip.length;
-        for (var i = 0; i < resultado; i++) {
-            zip = '0' + zip;
-        }
-        $(this).val(zip);
+
     });
+
+
+
+
 
     // Se actualizan los apellidos de facturacion si cambia los datos.
     $('#apellidos').focusout(function() {
@@ -170,7 +214,7 @@ $(document).ready(function() {
         $('#label_nif').text('Nif:');
         $('#nombreempresa').val($('#nombre').val() + ' ' + $('#apellidos').val());
         $('label[for="cif"]').hide();
-        $('#cif').val('').hide();
+        $('#cifnif').val('').hide();
         $('#nif').show();
         $('label[for="nif"]').show();
     });
@@ -181,9 +225,11 @@ $(document).ready(function() {
         $('#label_nombre').text('Empresa:');
         $('#label_nif').text('Cif:');
         $('label[for="nif"]').hide();
-        $('#nif').val('').hide();
+        $('#cifnif').val('').hide();
         $('#cif').show();
         $('label[for="cif"]').show();
+        $('label[for="particular"]').hide();
+
     });
 
     // Metodo para comprobar la complejidad de la contraseña.
@@ -385,3 +431,21 @@ $(document).ready(function() {
 
 
 });
+
+/* Validación del Código Postal mediante Ajax
+        $('#zip').change(function(){
+            if($(this).val()!=""){
+                var dato=$(this).val();
+                $.ajax({
+                    type:"POST",
+                    dataType:"html",
+                    url:"http://localhost/futbolistas/validar_zip_db.php",
+                    data:"zip="+dato,
+                    success:function(msg){
+                        alert(msg);
+                        $("#provincia").val(msg);
+                    }
+                });
+            }           
+        });
+        */
