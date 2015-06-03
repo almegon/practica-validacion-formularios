@@ -20,7 +20,8 @@ $(document).ready(function() {
             email: {
                 required: true,
                 email: true,
-                remote: 'http://localhost/futbolistas/validar_email_db.php'
+                //remote: 'http://localhost/futbolistas/validar_email_db.php'
+                remote: '../php/validar_email_db.php'
             },
             emailConf: {
                 equalTo: '#email'
@@ -30,7 +31,8 @@ $(document).ready(function() {
                     return $('#particular').is(':checked');
                 },
                 nif: 'nif',
-                remote: 'http://localhost/futbolistas/validar_nif_db.php'
+                //remote: 'http://localhost/futbolistas/validar_nif_db.php'
+                remote: '../php/validar_nif_db.php'
             },
             cif: {
                 required: function() {
@@ -134,37 +136,22 @@ $(document).ready(function() {
 
 
 
-    // $('#zip').on('focusout', function(){
-    // var codpostal = document.getElementById('zip').value;
-    // var postalformat = ('0000' + codpostal).slice (-5);
-    // document.getElementById('zip').value = postalformat;
-    // });
-
-
-    // Si el Código Postal se compone de 4 dígitos, se agrega un 0 a la izquierda.
-    /*$('#zip').focusout(function() {
-                var caracteres = $('#zip').val();
-                if (caracteres.length === 4)
-                    $('#zip').val("0" + caracteres);
-            });
-*/
-
     /*//Validación del Código Postal mediante Ajax
-           $('#zip').change(function(){
-               if($(this).val()!==""){
-                   var dato=$(this).val();
-                   $.ajax({
-                       type:'POST',
-                       dataType:'html',
-                       url:'http://localhost/futbolistas/validar_zip_db.php',
-                       data:"zip="+dato,
-                       success:function(msg){
-                           alert(msg);
-                           $('#provincia').val(msg);
-                       }
-                   });
-               }           
-           });*/
+       $('#zip').change(function(){
+           if($(this).val()!==""){
+               var dato=$(this).val();
+               $.ajax({
+                   type:'POST',
+                   dataType:'html',
+                   url:'http://localhost/futbolistas/validar_zip_db.php',
+                   data:"zip="+dato,
+                   success:function(msg){
+                       alert(msg);
+                       $('#provincia').val(msg);
+                   }
+               });
+           }           
+       });*/
 
 
 
@@ -190,9 +177,6 @@ $(document).ready(function() {
         }
 
     });
-
-
-
 
 
     // Se actualizan los apellidos de facturacion si cambia los datos.
@@ -431,21 +415,3 @@ $(document).ready(function() {
 
 
 });
-
-/* Validación del Código Postal mediante Ajax
-        $('#zip').change(function(){
-            if($(this).val()!=""){
-                var dato=$(this).val();
-                $.ajax({
-                    type:"POST",
-                    dataType:"html",
-                    url:"http://localhost/futbolistas/validar_zip_db.php",
-                    data:"zip="+dato,
-                    success:function(msg){
-                        alert(msg);
-                        $("#provincia").val(msg);
-                    }
-                });
-            }           
-        });
-        */
