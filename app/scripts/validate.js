@@ -21,7 +21,7 @@ $(document).ready(function() {
                 required: true,
                 email: true,
                 //remote: 'http://localhost/futbolistas/validar_email_db.php'
-                remote: '../php/validar_email_db.php'
+                remote: 'php/validar_email_db.php'
             },
             emailConf: {
                 equalTo: '#email'
@@ -32,7 +32,7 @@ $(document).ready(function() {
                 },
                 nif: 'nif',
                 //remote: 'http://localhost/futbolistas/validar_nif_db.php'
-                remote: '../php/validar_nif_db.php'
+                remote: 'php/validar_nif_db.php'
             },
             cif: {
                 required: function() {
