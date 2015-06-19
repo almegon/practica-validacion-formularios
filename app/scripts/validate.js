@@ -94,8 +94,11 @@ $(document).ready(function() {
             var usuario = $('#usuario').val();
             var cuota = $('input[name="pago"]:checked').val();
             var aceptar = confirm('Va a dar de alta el usuario: ' + usuario + ' y se cobrara la primera cuota de ' + cuota + ' €');
-            if (aceptar === 1) { // ===true
+            if (aceptar === true) { // ===true
                 alert('¡Envíado! ' + usuario);
+            }
+            else{
+                alert('No se ha enviado '+ usuario);
             }
         }
     });
